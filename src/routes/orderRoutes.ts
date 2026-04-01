@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { createOrderSchema } from "../validation/schemas";
 import { orderService } from "../services/orderService";
+import { createOrderSchema } from "../validation/schemas";
 
 const router = Router();
 // In a real application I would be caling the contrller method here instead of directly
