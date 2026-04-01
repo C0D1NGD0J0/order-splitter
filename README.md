@@ -81,11 +81,3 @@ tests/
 | `zod` | Runtime request validation with TypeScript type inference |
 | `uuid` | Unique order ID generation |
 | `jest` + `ts-jest` + `supertest` | Testing |
-
-## Design Decisions
-
-- **`Math.floor` over `Math.round`** for quantities — truncation prevents over-purchasing fractional shares
-- **App/server separation** — `app.ts` exports Express for supertest; `server.ts` calls `.listen()`
-- **Zod at the boundary** — validates and transforms input before any business logic runs
-- **In-memory store behind a class** — satisfies "no persistence" requirement while keeping an interface that's swappable for a real database
-- **Percentage-based allocations (0–100)** — more intuitive for partners than decimals. "60% AAPL" reads cleaner in API payloads than 0.6
