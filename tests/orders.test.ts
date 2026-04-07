@@ -29,11 +29,9 @@ it("splits investment correctly across portfolio allocations", async () => {
   const aapl = res.body.lineItems.find((i: any) => i.symbol === "AAPL");
   const tsla = res.body.lineItems.find((i: any) => i.symbol === "TSLA");
 
-  // $100 * 60% = $60 / $100 per share = 0.6 shares
   expect(aapl.amount).toBe(60);
   expect(aapl.quantity).toBe(0.6);
 
-  // $100 * 40% = $40 / $100 per share = 0.4 shares
   expect(tsla.amount).toBe(40);
   expect(tsla.quantity).toBe(0.4);
 });
@@ -56,9 +54,7 @@ it("uses partner-provided stock prices over the default", async () => {
   const aapl = res.body.lineItems.find((i: any) => i.symbol === "AAPL");
   const tsla = res.body.lineItems.find((i: any) => i.symbol === "TSLA");
 
-  // $1000 * 60% = $600 / $200 = 3 shares
   expect(aapl.quantity).toBe(3);
-  // $1000 * 40% = $400 / $50 = 8 shares
   expect(tsla.quantity).toBe(8);
 });
 

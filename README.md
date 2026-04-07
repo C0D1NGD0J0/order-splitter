@@ -13,13 +13,13 @@ npm test           # Run tests
 npm run test:coverage
 ```
 
-Server starts on `http://localhost:3000`.
+Server starts on `http://localhost:5000`.
 
 ## Configuration
 
 | Variable | Default | Description |
 |---|---|---|
-| `PORT` | `3000` | Server port |
+| `PORT` | `5000` | Server port |
 | `QUANTITY_DECIMAL_PLACES` | `3` | Max decimal places for share quantities |
 | `DEFAULT_STOCK_PRICE` | `100` | Default price when no override provided |
 
@@ -57,19 +57,19 @@ curl http://localhost:3000/api/orders/<order-id>
 ## Project Structure
 
 ```
+app.ts                        # Express app class (separated for testability)
+server.ts                     # Entry point, Server singleton
 src/
-├── app.ts                    # Express app (separated for testability)
-├── server.ts                 # Entry point
-├── config/index.ts           # Centralized config
+├── config/index.ts           # Centralized config (env var parsing)
+├── interfaces/index.ts       # TypeScript interfaces
 ├── middleware/responseTime.ts # Response time logging
-├── models/types.ts           # TypeScript interfaces
 ├── routes/orderRoutes.ts     # REST route handlers
-├── services/orderService.ts  # Core splitting logic
+├── services/orderService.ts  # Core order splitting logic
 ├── store/orderStore.ts       # In-memory data store
 ├── utils/scheduling.ts       # Market hours scheduling
 └── validation/schemas.ts     # Zod request validation
 tests/
-├── orders.test.ts            # API integration tests (17 tests)
+├── orders.test.ts            # API integration tests (6 tests)
 └── scheduling.test.ts        # Scheduling unit tests (6 tests)
 ```
 

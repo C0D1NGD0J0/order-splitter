@@ -7,41 +7,40 @@ dayjs.extend(utc);
 /**
  * Determines the next valid market execution time.
  *
- * Markets are open Monday–Friday during configured hours.
- * - If currently within market hours on a weekday → execute now.
- * - If before market open on a weekday → schedule for today's open.
- * - If after market close on a weekday or on a weekend → schedule for
+ * Markets are open Monday–Friday, 9:30am–4:00pm ET (14:30–21:00 UTC).
+ * - currently within market hours on a weekday → execute now.
+ * - before market open on a weekday → schedule for today's open.
+ * - after market close on a weekday or on a weekend → schedule for
  *   the next weekday's market open.
  */
 export function getNextExecutionTime(now: Date = new Date()): Date {
   const current = dayjs.utc(now);
-  const day = current.day(); // 0 = Sunday, 6 = Saturday
-  const hour = current.hour();
+  const day = current.day();
+
+  const totalMinutes = current.hour() * 60 + current.minute();
+  const openMinutes = config.marketOpenHour * 60 + config.marketOpenMinute;
+  const closeMinutes = config.marketCloseHour * 60;
 
   const isWeekday = day >= 1 && day <= 5;
   const isDuringMarketHours =
-    hour >= config.marketOpenHour && hour < config.marketCloseHour;
+    totalMinutes >= openMinutes && totalMinutes < closeMinutes;
 
-  // if weekday + market is open = execute immediately
   if (isWeekday && isDuringMarketHours) {
     return now;
   }
 
-  // if weekday + before market open = schedule for today's open
-  if (isWeekday && hour < config.marketOpenHour) {
+  if (isWeekday && totalMinutes < openMinutes) {
     return current
       .hour(config.marketOpenHour)
-      .minute(0)
+      .minute(config.marketOpenMinute)
       .second(0)
       .millisecond(0)
       .toDate();
   }
-
-  // if after market close on a weekday, or weekend → advance to next weekday
   let next = current
     .add(1, "day")
     .hour(config.marketOpenHour)
-    .minute(0)
+    .minute(config.marketOpenMinute)
     .second(0)
     .millisecond(0);
 

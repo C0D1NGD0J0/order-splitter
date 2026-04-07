@@ -3,8 +3,6 @@ import { orderService } from "../services/orderService";
 import { createOrderSchema } from "../validation/schemas";
 
 const router = Router();
-// In a real application I would be caling the contrller method here instead of directly
-// accessing the service, but for simplicity I'm skipping the controller layer in this situation
 
 router.post("/", (req: Request, res: Response) => {
   const result = createOrderSchema.safeParse(req.body);
@@ -34,6 +32,10 @@ router.get("/", (req: Request, res: Response) => {
 
   if (type && typeof type === "string") {
     const upper = type.toUpperCase();
+    if (upper !== "BUY" && upper !== "SELL") {
+      res.status(400).json({ error: "Invalid type. Must be BUY or SELL." });
+      return;
+    }
     orders = orders.filter((o) => o.type === upper);
   }
 
