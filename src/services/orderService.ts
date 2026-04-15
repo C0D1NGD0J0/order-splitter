@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import { v4 as uuidv4 } from "uuid";
 import config from "../config";
 import { orderStore } from "../store/orderStore";
@@ -5,32 +6,28 @@ import { getNextExecutionTime } from "../utils/scheduling";
 import { CreateOrderRequest, Order, OrderLineItem } from "../interfaces/index";
 
 class OrderService {
-  private static roundToDecimalPlaces(value: number, places: number): number {
-    const factor = Math.pow(10, places);
-    return Math.floor(value * factor) / factor;
-  }
-
   createOrder(request: CreateOrderRequest): Order {
     const { portfolio, amount, type } = request;
 
-    const lineItems: OrderLineItem[] = portfolio.allocations.map(
-      (allocation) => {
-        const price = allocation.price ?? config.defaultStockPrice;
-        const allocatedAmount = amount * (allocation.percentage / 100);
-        const quantity = OrderService.roundToDecimalPlaces(
-          allocatedAmount / price,
-          config.quantityDecimalPlaces,
-        );
+    // BUY: floor to never overspend. SELL: round to maximise shares sold.
+    const qtyRounding = type === "BUY" ? Decimal.ROUND_DOWN : Decimal.ROUND_HALF_UP;
 
-        return {
-          symbol: allocation.symbol,
-          allocationPercentage: allocation.percentage,
-          price,
-          amount: OrderService.roundToDecimalPlaces(allocatedAmount, 2),
-          quantity,
-        };
-      },
-    );
+    const lineItems: OrderLineItem[] = portfolio.allocations.map((allocation) => {
+      const price = allocation.price ?? config.defaultStockPrice;
+      const allocatedAmount = new Decimal(amount).mul(allocation.percentage).div(100);
+      const quantity = allocatedAmount
+        .div(price)
+        .toDecimalPlaces(config.quantityDecimalPlaces, qtyRounding)
+        .toNumber();
+
+      return {
+        symbol: allocation.symbol,
+        allocationPercentage: allocation.percentage,
+        price,
+        amount: allocatedAmount.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber(),
+        quantity,
+      };
+    });
 
     const order: Order = {
       id: uuidv4(),

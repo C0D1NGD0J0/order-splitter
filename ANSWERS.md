@@ -10,8 +10,8 @@ I divided the problem into three parts: order splitting (core math), execution s
 
 ## What assumptions did you make?
 - Allocations are percentages (0–100) summing to 100%, with a 0.01 tolerance for floating-point rounding
-- Share quantities are floored, not rounded — rounding up risks exceeding the intended investment
-- Market hours: Mon–Fri, 14:00–21:00 UTC (approx. US Eastern 9:30–4pm). No holiday calendar
+- BUY quantities are floored to never overspend; SELL quantities are rounded to maximize shares sold
+- Market hours: Mon–Fri, 14:30–21:00 UTC (9:30am–4:00pm ET). No holiday calendar
 - Stock symbols are normalized to uppercase
 - "Historic orders" = all orders in the current session (in-memory, no persistence)
 - `executionTime` is either now (if markets are open) or the next market open
@@ -29,4 +29,4 @@ I divided the problem into three parts: order splitting (core math), execution s
 - Business logic: real market data provider, order status lifecycle (PENDING → SCHEDULED → EXECUTED → SETTLED), audit logging
 
 ## LLM usage
-Used Claude to discuss and plan my architecture desig, and drafting documentation. The `Server` singleton pattern was modelled after a production Node.js codebase I am currently building. Design decisions, tradeoffs, and code, and code-review are mine.
+Used Claude to discuss and plan the architecture design and draft documentation. The `Server` singleton pattern was modelled after a production Node.js codebase I am currently building. Design decisions, tradeoffs, and code review are mine.

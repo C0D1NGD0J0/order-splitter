@@ -24,5 +24,8 @@ export class App implements IAppSetup {
     this.expApp.get("/health", (_req, res) => {
       res.json({ status: "ok" });
     });
+    this.expApp.use((_req, res) => {
+      res.status(404).json({ error: "Route not found" });
+    });
   }
 }
