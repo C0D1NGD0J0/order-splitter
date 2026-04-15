@@ -5,38 +5,33 @@ function utcDate(isoString: string): Date {
 }
 
 describe("getNextExecutionTime", () => {
-  it("returns current time when markets are open (weekday 14:30–21:00 UTC)", () => {
+  it("returns current time when markets are open", () => {
     const now = utcDate("2024-01-15T15:00:00Z"); // Monday 3pm UTC
     expect(getNextExecutionTime(now)).toEqual(now);
   });
 
-  it("schedules for today's open when before 14:30 UTC on a weekday", () => {
+  it("schedules for today's open when before market hours on a weekday", () => {
     const now = utcDate("2024-01-15T10:00:00Z"); // Monday 10am UTC
-    const result = getNextExecutionTime(now);
-    expect(result).toEqual(utcDate("2024-01-15T14:30:00Z"));
+    expect(getNextExecutionTime(now)).toEqual(utcDate("2024-01-15T14:30:00Z"));
   });
 
-  it("schedules for next weekday open when after market close on a weekday", () => {
+  it("schedules for next day when after market close on a weekday", () => {
     const now = utcDate("2024-01-15T22:00:00Z"); // Monday 10pm UTC
-    const result = getNextExecutionTime(now);
-    expect(result).toEqual(utcDate("2024-01-16T14:30:00Z")); // Tuesday open
+    expect(getNextExecutionTime(now)).toEqual(utcDate("2024-01-16T14:30:00Z")); // Tuesday
   });
 
-  it("schedules for Monday open when it is Saturday", () => {
-    const now = utcDate("2024-01-13T15:00:00Z"); // Saturday
-    const result = getNextExecutionTime(now);
-    expect(result).toEqual(utcDate("2024-01-15T14:30:00Z")); // Monday open
+  it("skips to Monday when placed on Friday after close", () => {
+    const now = utcDate("2024-01-19T22:00:00Z"); // Friday 10pm UTC
+    expect(getNextExecutionTime(now)).toEqual(utcDate("2024-01-22T14:30:00Z")); // Monday
   });
 
-  it("schedules for Monday open when it is Sunday", () => {
-    const now = utcDate("2024-01-14T15:00:00Z"); // Sunday
-    const result = getNextExecutionTime(now);
-    expect(result).toEqual(utcDate("2024-01-15T14:30:00Z")); // Monday open
+  it("skips to Monday when placed on Saturday", () => {
+    const now = utcDate("2024-01-20T15:00:00Z"); // Saturday
+    expect(getNextExecutionTime(now)).toEqual(utcDate("2024-01-22T14:30:00Z")); // Monday
   });
 
-  it("schedules for Monday open when it is Friday after market close", () => {
-    const now = utcDate("2024-01-19T21:30:00Z"); // Friday 9:30pm UTC
-    const result = getNextExecutionTime(now);
-    expect(result).toEqual(utcDate("2024-01-22T14:30:00Z")); // Monday open
+  it("does not execute at 14:29 UTC — one minute before open", () => {
+    const now = utcDate("2024-01-15T14:29:00Z"); // Monday, 1 min before open
+    expect(getNextExecutionTime(now)).toEqual(utcDate("2024-01-15T14:30:00Z"));
   });
 });
